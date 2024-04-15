@@ -21,7 +21,7 @@ const userIgnoredDirectories = userConfig['ai-test-generation']['ignored-directo
 const testsDirectory = userTestsDirectory ?? defaultTestsDirectory
 const apiKey = userApiKey;
 const model = userModel ?? defaultModel
-const ignoredDirectories = [testsDirectory, ...(userIgnoredDirectories ?? defaultIgnoredDirectories)]
+const ignoredDirectories = [testsDirectory, ...defaultIgnoredDirectories, ...userIgnoredDirectories]
 
 let checkList = []
 
