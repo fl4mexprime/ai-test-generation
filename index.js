@@ -150,6 +150,7 @@ const getFilePaths = (path) =>
     fs.readdirSync(path, {withFileTypes: true, recursive: true})
         .filter(dirent => !dirent.isDirectory())
         .filter((dir) => dir.name.match('.ts$'))
+        .filter((dir) => !dir.name.match('.test.ts$'))
         .map(dirent => `${dirent.path}\\${dirent.name}`)
 
 const readFile = async (path) => fs.readFileSync(path, 'utf-8')
