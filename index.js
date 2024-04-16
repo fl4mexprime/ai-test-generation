@@ -86,8 +86,6 @@ const analyse = async () => {
             const pathStrings = path.split('\\')
             const fileName = pathStrings[pathStrings.length - 1];
 
-            checkList[index] = `❇️ ${fileName}`
-
             if (fs.existsSync(`${projectDirectory}\\src\\${testsDirectory}\\${convertToTestName(fileName)}`)) {
                 checkList.splice(index, 1)
                 continue
@@ -106,11 +104,8 @@ const analyse = async () => {
             })
 
             if (!response.ok) {
-                checkList[index] = `⚠️ ${fileName}:${response.statusText}`
                 throw Error(response.statusText)
             }
-
-            checkList[index] = `✅  ${fileName}`
 
             clearInterval(interval)
 
