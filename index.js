@@ -1,6 +1,9 @@
 const fs = require('node:fs');
-const readline = require("readline");
 const postTestRequest = require("./api/open-ai");
+const { getImports, getFilePaths, getDirectories, readFile} = require("./utils/files");
+const { requestUserInput } = require("./utils/input");
+const { convertToTestName, replaceImportPath, removeFileExtension, getRelativePath } = require("./utils/strings");
+const { loadingSpinner } = require("./utils/output");
 const projectDirectory = process.cwd();
 
 const config = JSON.parse(fs.readFileSync(`${projectDirectory}\\node_modules\\ai-test-generation\\package.json`, 'utf-8'))
@@ -111,11 +114,12 @@ const analyse = async () => {
 
             const data = await response.json()
 
-            const code = data.choices[0].message.content.replaceAll('```', '').replace(/typescript|javascript|js|ts|jsx|tsx/gm, '')
+            let code = data.choices[0].message.content.replace(/```(jest|typescript|javascript|js|ts|jsx|tsx)/gm, '').replaceAll('```', '')
+            code = replaceImportPath(code, `../${getRelativePath(removeFileExtension(path).replaceAll("\\","/"))}`)
 
-            await fs.writeFileSync(`${projectDirectory}\\src\\${testsDirectory}\\${convertToTestName(fileName)}`, code)
+            const imports = getImports(content, path)
 
-            clearInterval(loadingSpinner())
+            await fs.writeFileSync(`${projectDirectory}\\src\\${testsDirectory}\\${convertToTestName(fileName)}`, `${imports.join("\n")}\n${code}`.trim())
             index++;
         }
 
@@ -129,64 +133,5 @@ const analyse = async () => {
         console.error(`⚠️ ${err}`);
     }
 }
-
-const requestUserInput = (query) => {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
-
-    return new Promise(resolve => rl.question(query, ans => {
-        rl.close();
-        resolve(ans);
-    }))
-}
-
-const getDirectories = (path) => fs.readdirSync(path, {withFileTypes: true}).filter((item) => item.isDirectory())
-
-const getFilePaths = (path) =>
-    fs.readdirSync(path, {withFileTypes: true, recursive: true})
-        .filter(dirent => !dirent.isDirectory())
-        .filter((dir) => dir.name.match('.ts$'))
-        .filter((dir) => !dir.name.match('.test.ts$'))
-        .map(dirent => `${dirent.path}\\${dirent.name}`)
-
-const readFile = async (path) => fs.readFileSync(path, 'utf-8')
-
-const convertToTestName = (fileName) => {
-    const fileNameStrings = fileName.split('.')
-    return `${fileNameStrings[0]}.test.${fileNameStrings[1]}`
-}
-
-const loadingSpinner = (progressCount, progressArray) => {
-    const h = ['|', '/', '-', '\\'];
-    let i = 0;
-    const totalCount = progressArray?.length
-
-    return setInterval(() => {
-        i = (i > 3) ? 0 : i;
-
-        console.clear();
-
-        const progressBar = `                                                  `.split('')
-
-        console.log(`[${progressBar.map((progress, progressIndex) => {
-            let percentage = (Math.floor((progressCount / totalCount) * 100)).toString()
-
-            percentage = percentage.padStart(3, "0")
-
-            if (progressIndex === 24) return percentage
-            if (progressIndex === 25) return "%"
-
-            if (progressIndex * 2 < ((progressCount / totalCount) * 100)) return '='
-
-            return progress
-        }).join('')}]`)
-
-        console.log(`${progressArray[progressCount]} ${h[i]}`)
-
-        i++;
-    }, 150);
-};
 
 void analyse()
