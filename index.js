@@ -99,7 +99,8 @@ const analyse = async () => {
             const response = await postTestRequest(content, {
                 apiKey,
                 model,
-                path: `../${path.split("src\\")[1].replace('\\', '/').replace(/.ts|.js/gm, '')}`,
+                filePath: `../${path.split("src\\")[1].replace('\\', '/').replace(/.ts|.js/gm, '')}`,
+                ownPath: `${projectDirectory}\\src\\${testsDirectory}`
             })
 
             if (!response.ok) {
