@@ -21,7 +21,7 @@ const userIgnoredDirectories = userConfig['ai-test-generation']['ignored-directo
 const testsDirectory = userTestsDirectory ?? defaultTestsDirectory
 const apiKey = userApiKey;
 const model = userModel ?? defaultModel
-const ignoredDirectories = [testsDirectory, ...defaultIgnoredDirectories, ...userIgnoredDirectories]
+const ignoredDirectories = [testsDirectory, ...defaultIgnoredDirectories, ...(userIgnoredDirectories?.length > 0 ? userIgnoredDirectories : [])]
 
 let checkList = []
 
@@ -93,13 +93,14 @@ const analyse = async () => {
 
             const content = await readFile(path)
 
-            const interval = loadingSpinner(`Querying for ${fileName}...`, index)
+            const interval = loadingSpinner(index, checkList)
 
             // Query api
             const response = await postTestRequest(content, {
                 apiKey,
                 model,
-                path: `../${path.split("src\\")[1].replace('\\', '/').replace(/.ts|.js/gm, '')}`,
+                filePath: `../${path.split("src\\")[1].replace('\\', '/').replace(/.ts|.js/gm, '')}`,
+                ownPath: `${projectDirectory}\\src\\${testsDirectory}`
             })
 
             if (!response.ok) {
@@ -160,9 +161,10 @@ const convertToTestName = (fileName) => {
     return `${fileNameStrings[0]}.test.${fileNameStrings[1]}`
 }
 
-const loadingSpinner = (text, index) => {
+const loadingSpinner = (progressCount, progressArray) => {
     const h = ['|', '/', '-', '\\'];
     let i = 0;
+    const totalCount = progressArray?.length
 
     return setInterval(() => {
         i = (i > 3) ? 0 : i;
@@ -172,21 +174,21 @@ const loadingSpinner = (text, index) => {
         const progressBar = `                                                  `.split('')
 
         console.log(`[${progressBar.map((progress, progressIndex) => {
-            let percentage = (Math.floor((index / checkList.length) * 100)).toString()
+            let percentage = (Math.floor((progressCount / totalCount) * 100)).toString()
 
-            for (let j = percentage.length; j < 3; j++) {
+            percentage = percentage.padStart(3, "0")
                 percentage = `0${percentage}`
             }
 
             if (progressIndex === 24) return percentage
             if (progressIndex === 25) return "%"
 
-            if (progressIndex * 2 < ((index / checkList.length) * 100)) return '='
+            if (progressIndex * 2 < ((progressCount / totalCount) * 100)) return '='
 
             return progress
         }).join('')}]`)
 
-        console.log(`${checkList[index]} ${text, h[i]}`)
+        console.log(`${progressArray[progressCount]} ${h[i]}`)
 
         i++;
     }, 150);
