@@ -1,6 +1,6 @@
-const {createInterface} = require("readline");
+import {createInterface} from "readline";
 
-const requestUserInput = (query) => {
+export const requestUserInput = (query) => {
     const rl = createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -10,8 +10,4 @@ const requestUserInput = (query) => {
         rl.close();
         resolve(ans);
     }))
-}
-
-module.exports = {
-    requestUserInput
 }

@@ -1,4 +1,4 @@
-const loadingSpinner = (progressCount, progressArray) => {
+export const loadingSpinner = (progressCount, progressArray) => {
     const h = ['|', '/', '-', '\\'];
     let i = 0;
     const totalCount = progressArray?.length
@@ -29,6 +29,6 @@ const loadingSpinner = (progressCount, progressArray) => {
     }, 150);
 };
 
-module.exports = {
-    loadingSpinner
-}
+// module.exports = {
+//     loadingSpinner
+// }

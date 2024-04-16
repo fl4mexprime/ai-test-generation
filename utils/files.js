@@ -1,6 +1,6 @@
-const {readFileSync, readdirSync} = require("fs");
+import {readdirSync, readFileSync} from "fs";
 
-const getImports = (file, path)=> {
+export const getImports = (file, path)=> {
     const imports = file.match(/^import .+/gm)
 
     if (imports === null) return []
@@ -12,7 +12,7 @@ const getImports = (file, path)=> {
     return imports
 }
 
-const getFilePaths = (path) =>
+export const getFilePaths = (path) =>
     readdirSync(path, {withFileTypes: true, recursive: true})
         .filter(dirent => !dirent.isDirectory())
         .filter((dir) => dir.name.match('.ts$'))
@@ -20,14 +20,6 @@ const getFilePaths = (path) =>
         .map(dirent => `${dirent.path}\\${dirent.name}`)
 
 
-const getDirectories = (path) => readdirSync(path, {withFileTypes: true}).filter((item) => item.isDirectory())
+export const getDirectories = (path) => readdirSync(path, {withFileTypes: true}).filter((item) => item.isDirectory())
 
-const readFile = async (path) => readFileSync(path, 'utf-8')
-
-module.exports = {
-    getImports,
-    getFilePaths,
-    getDirectories,
-    readFile
-}
-
+export const readFile = async (path) => readFileSync(path, 'utf-8')
