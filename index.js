@@ -23,7 +23,7 @@ const apiKey = userApiKey;
 const model = userModel ?? defaultModel
 const ignoredDirectories = [testsDirectory, ...defaultIgnoredDirectories, ...(userIgnoredDirectories?.length > 0 ? userIgnoredDirectories : [])]
 
-let checkList = []
+let checkList = [];
 
 const analyse = async () => {
     try {
