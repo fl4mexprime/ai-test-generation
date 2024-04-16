@@ -1,8 +1,6 @@
 const postTestRequest = async (code,
     {
         apiKey,
-        filePath,
-        ownPath,
         model
     }
 ) => {
@@ -17,7 +15,7 @@ const postTestRequest = async (code,
             messages: [
                 {
                     role: "user",
-                    content: `Generate me a jest test for this function and only respond with code. Your current path is: ${ownPath}, the current function path is: ${filePath}. Import any missing dependencies. Include multiple tests if possible. Function code: ${code}.`
+                    content: `Generate me a test for this function using jest and only respond with code. add the import from ##IMPORT-PATH## - Check if it is a named export. Include multiple tests. Function code: ${code}.`
                 }
             ],
             temperature: 1,
@@ -34,3 +32,5 @@ const postTestRequest = async (code,
 }
 
 module.exports = postTestRequest
+
+// Your current path is: ${ownPath}, the current function path is: ${filePath}. Import any missing dependencies

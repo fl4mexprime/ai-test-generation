@@ -10,7 +10,8 @@
         "components",
         "constants",
         "enums",
-        "hooks"
+        "hooks",
+        "contexts"
     ],
     "version": "1.0.0",
     "license": "MIT",
