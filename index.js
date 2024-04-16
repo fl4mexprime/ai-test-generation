@@ -177,8 +177,6 @@ const loadingSpinner = (progressCount, progressArray) => {
             let percentage = (Math.floor((progressCount / totalCount) * 100)).toString()
 
             percentage = percentage.padStart(3, "0")
-                percentage = `0${percentage}`
-            }
 
             if (progressIndex === 24) return percentage
             if (progressIndex === 25) return "%"
