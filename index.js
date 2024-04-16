@@ -70,6 +70,7 @@ const analyse = async () => {
             return;
         }
 
+        // Create list of valid directories
         const filePaths = validDirectories.flatMap((directory) => getFilePaths(`${projectDirectory}\\src\\${directory}`))
 
         checkList = filePaths.map((path) => {
@@ -80,6 +81,7 @@ const analyse = async () => {
         let index = 0;
         const startDate = new Date()
 
+        // Loop each path
         for (const path of filePaths) {
             const pathStrings = path.split('\\')
             const fileName = pathStrings[pathStrings.length - 1];
