@@ -1,13 +1,15 @@
-const fs = require('node:fs');
-const postTestRequest = require("./api/open-ai");
-const { getImports, getFilePaths, getDirectories, readFile} = require("./utils/files");
-const { requestUserInput } = require("./utils/input");
-const { convertToTestName, replaceImportPath, removeFileExtension, getRelativePath } = require("./utils/strings");
-const { loadingSpinner } = require("./utils/output");
+import {readFileSync, existsSync, mkdirSync, writeFileSync} from "fs";
+import {requestUserInput} from "./utils/input.js";
+import {getDirectories, getFilePaths, getImports, readFile} from "./utils/files.js";
+import {convertToTestName} from "./utils/strings.js";
+import {loadingSpinner} from "./utils/output.js";
+import postTestRequest from "./api/open-ai.js";
+import {AddImportPath, cleanAIOutput} from "./utils/code.js";
+
 const projectDirectory = process.cwd();
 
-const config = JSON.parse(fs.readFileSync(`${projectDirectory}\\node_modules\\ai-test-generation\\package.json`, 'utf-8'))
-const userConfig = JSON.parse(fs.readFileSync(`${projectDirectory}\\package.json`, 'utf-8'))
+const config = JSON.parse(readFileSync(`${projectDirectory}\\node_modules\\ai-test-generation\\package.json`, 'utf-8'))
+const userConfig = JSON.parse(readFileSync(`${projectDirectory}\\package.json`, 'utf-8'))
 
 // Default-Config
 const defaultTestsDirectory = config['tests-directory']
@@ -41,13 +43,13 @@ const analyse = async () => {
         }
 
         // Check if src directory is present
-        if (!fs.existsSync(`${projectDirectory}\\src`)) {
+        if (!existsSync(`${projectDirectory}\\src`)) {
             console.log("Could not find project src. Make sure you are in the correct directory")
             return;
         }
 
         // Check if tests directory is present
-        if (!fs.existsSync(`${projectDirectory}\\src\\${testsDirectory}`)) {
+        if (!existsSync(`${projectDirectory}\\src\\${testsDirectory}`)) {
             console.log(`tests directory (${testsDirectory}) not found or naming is mismatched`)
 
             const result = await requestUserInput("Create folder in project src now? (y/n): ")
@@ -57,7 +59,7 @@ const analyse = async () => {
                 return
             }
 
-            await fs.mkdirSync(`${projectDirectory}\\src\\${testsDirectory}`)
+            await mkdirSync(`${projectDirectory}\\src\\${testsDirectory}`)
         }
 
         // Get all valid directories
@@ -89,7 +91,7 @@ const analyse = async () => {
             const pathStrings = path.split('\\')
             const fileName = pathStrings[pathStrings.length - 1];
 
-            if (fs.existsSync(`${projectDirectory}\\src\\${testsDirectory}\\${convertToTestName(fileName)}`)) {
+            if (existsSync(`${projectDirectory}\\src\\${testsDirectory}\\${convertToTestName(fileName)}`)) {
                 checkList.splice(index, 1)
                 continue
             }
@@ -107,19 +109,19 @@ const analyse = async () => {
             })
 
             if (!response.ok) {
-                throw Error(response.statusText)
+                Error(response.statusText)
             }
 
             clearInterval(interval)
 
             const data = await response.json()
 
-            let code = data.choices[0].message.content.replace(/```(jest|typescript|javascript|js|ts|jsx|tsx)/gm, '').replaceAll('```', '')
-            code = replaceImportPath(code, `../${getRelativePath(removeFileExtension(path).replaceAll("\\","/"))}`)
+            const code = cleanAIOutput(data.choices[0].message.content)
+            const codeWithImports = AddImportPath(code, path)
 
             const imports = getImports(content, path)
 
-            await fs.writeFileSync(`${projectDirectory}\\src\\${testsDirectory}\\${convertToTestName(fileName)}`, `${imports.join("\n")}\n${code}`.trim())
+            await writeFileSync(`${projectDirectory}\\src\\${testsDirectory}\\${convertToTestName(fileName)}`, `${imports.join("\n")}\n${codeWithImports}`.trim())
             index++;
         }
 
@@ -127,8 +129,9 @@ const analyse = async () => {
 
         const timeBetween = (endDate.getTime() - startDate.getTime()) / 1000
 
+        // Display results
         console.clear()
-        console.log(`Added ${checkList.length} Tests in ${timeBetween} seconds. Check each test-file for errors and run 'jest' to verify the results.`)
+        console.log(`Added ${checkList.length} Test${checkList.length > 1 ? "s" : ""} in ${timeBetween} seconds. Check each test-file for errors and run 'jest' to verify the results.`)
     } catch (err) {
         console.error(`⚠️ ${err}`);
     }

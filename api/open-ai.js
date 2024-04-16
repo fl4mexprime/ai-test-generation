@@ -31,6 +31,4 @@ const postTestRequest = async (code,
     return fetch("https://api.openai.com/v1/chat/completions", request)
 }
 
-module.exports = postTestRequest
-
-// Your current path is: ${ownPath}, the current function path is: ${filePath}. Import any missing dependencies
+export default postTestRequest

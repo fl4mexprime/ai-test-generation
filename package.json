@@ -1,4 +1,5 @@
 {
+    "type": "module",
     "name": "ai-test-generation",
     "model": "gpt-3.5-turbo",
     "tests-directory": "tests",
