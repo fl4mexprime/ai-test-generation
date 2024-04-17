@@ -7,7 +7,6 @@ import postTestRequest from "./api/open-ai.js";
 import {AddImportPath, cleanAIOutput} from "./utils/code.js";
 
 const projectDirectory = process.cwd();
-
 const config = JSON.parse(readFileSync(`${projectDirectory}\\node_modules\\ai-test-generation\\package.json`, 'utf-8'))
 const userConfig = JSON.parse(readFileSync(`${projectDirectory}\\package.json`, 'utf-8'))
 
@@ -28,6 +27,7 @@ const apiKey = userApiKey;
 const model = userModel ?? defaultModel
 const ignoredDirectories = [testsDirectory, ...defaultIgnoredDirectories, ...(userIgnoredDirectories?.length > 0 ? userIgnoredDirectories : [])]
 
+// directories to check
 let checkList = [];
 
 const analyse = async () => {
@@ -91,6 +91,7 @@ const analyse = async () => {
             const pathStrings = path.split('\\')
             const fileName = pathStrings[pathStrings.length - 1];
 
+            // Check if there already is a test for this file
             if (existsSync(`${projectDirectory}\\src\\${testsDirectory}\\${convertToTestName(fileName)}`)) {
                 checkList.splice(index, 1)
                 continue
@@ -98,6 +99,7 @@ const analyse = async () => {
 
             const content = await readFile(path)
 
+            // Display loading status
             const interval = loadingSpinner(index, checkList)
 
             // Query api
@@ -112,15 +114,18 @@ const analyse = async () => {
                 Error(response.statusText)
             }
 
+            // Clear loading status
             clearInterval(interval)
 
             const data = await response.json()
 
+            // Clean-up code and add imports
             const code = cleanAIOutput(data.choices[0].message.content)
             const codeWithImports = AddImportPath(code, path)
 
             const imports = getImports(content, path)
 
+            // Write test file
             await writeFileSync(`${projectDirectory}\\src\\${testsDirectory}\\${convertToTestName(fileName)}`, `${imports.join("\n")}\n${codeWithImports}`.trim())
             index++;
         }
@@ -129,7 +134,7 @@ const analyse = async () => {
 
         const timeBetween = (endDate.getTime() - startDate.getTime()) / 1000
 
-        // Display results
+        // Display results (How many tests were added and how long did it take)
         console.clear()
         console.log(`Added ${checkList.length} Test${checkList.length > 1 ? "s" : ""} in ${timeBetween} seconds. Check each test-file for errors and run 'jest' to verify the results.`)
     } catch (err) {
