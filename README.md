@@ -13,7 +13,6 @@ A tool aimed at providing easy means to ensure maintainability of frontend code
    2. [Run tests (local)](#run-tests-local)
    3. [Run tests (CI)](#run-tests-ci)
 4. [Configuration](#configuration)
-5. [Behaviour]()
 
 ---
 
