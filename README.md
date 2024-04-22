@@ -59,7 +59,7 @@ tests directory (tests) not found or naming is mismatched
 Create folder in project src now? (y/n):
 ```
 
-This is a one-time consent to agree, that directories of your project will be searched.
+This is to consent that directories of your project will be searched.
 This may list other directories besides `utils` depending on you project and config
 
 ```
