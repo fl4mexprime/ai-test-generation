@@ -19,7 +19,7 @@ A tool aimed at providing easy means to ensure maintainability of frontend code
 ## Prerequisite
 
 * Currently you'll have to provide your own `Api-Key` for use with `api.openai.com`
-* `jest` is needed to run the generated tests on you machine as well as when building in you CI-pipeline. Consult the docs for configuration
+* `jest` is needed to run the generated tests on you machine as well as when building in you CI-pipeline. Consult the [docs](https://jestjs.io/docs/getting-started) for configuration
 
 ## Getting started
 
